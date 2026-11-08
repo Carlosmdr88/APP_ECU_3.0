@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>APP ECUS 2.0 | Ingreso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #0f172a;
+      }
+      .screen {
+        background: radial-gradient(circle at 50% 0%, #172b47 0%, #0f172a 50%);
+      }
+      .modal-backdrop {
+        backdrop-filter: blur(8px);
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex items-center justify-center text-slate-100 sm:p-5"
+  >
+    <main
+      class="screen w-full min-h-screen sm:min-h-0 sm:max-w-md sm:rounded-[36px] sm:border-[9px] sm:border-slate-800 sm:shadow-2xl flex flex-col overflow-hidden"
+    >
+      <header
+        class="bg-slate-950/80 px-6 py-4 flex justify-between items-center text-xs text-slate-400"
+      >
+        <span id="clock" class="font-mono tracking-widest">--:--</span>
+        <span class="font-bold tracking-wider text-sky-400">ECUS 2.0</span>
+        <i class="fa-solid fa-shield-halved"></i>
+      </header>
+      <section
+        class="flex-1 px-7 py-12 flex flex-col justify-center items-center text-center"
+      >
+        <div
+          class="w-24 h-24 rounded-[28px] bg-sky-500/10 border border-sky-500/30 flex items-center justify-center shadow-lg shadow-sky-500/10 mb-7"
+        >
+          <i class="fa-solid fa-shield-halved text-5xl text-sky-400"></i>
+        </div>
+        <span
+          class="text-[10px] tracking-[.25em] font-extrabold text-sky-400 bg-sky-500/10 border border-sky-500/20 rounded-full px-4 py-2"
+          >SISTEMA DE CONTROL</span
+        >
+        <h1 class="text-4xl font-extrabold tracking-tight mt-5">
+          APP ECUS <span class="text-sky-400">2.0</span>
+        </h1>
+        <p class="text-sm text-slate-400 mt-3">
+          Seleccione su tipo de acceso para continuar.
+        </p>
+        <div class="w-full mt-12 space-y-4">
+          <button
+            id="btn-user"
+            type="button"
+            class="w-full rounded-2xl bg-sky-500 hover:bg-sky-400 active:scale-[.98] transition-all p-5 text-slate-950 shadow-lg shadow-sky-500/15 text-left flex items-center gap-4"
+          >
+            <span
+              class="w-12 h-12 rounded-xl bg-slate-950/15 flex items-center justify-center"
+              ><i class="fa-solid fa-user text-xl"></i
+            ></span>
+            <span class="flex-1"
+              ><strong class="block text-sm">INGRESAR COMO USUARIO</strong
+              ><small class="block text-xs opacity-80 mt-1"
+                >Registro y consulta de colas</small
+              ></span
+            >
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button
+            id="btn-admin"
+            type="button"
+            class="w-full rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-600 active:scale-[.98] transition-all p-5 text-white text-left flex items-center gap-4"
+          >
+            <span
+              class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center"
+              ><i class="fa-solid fa-user-shield text-xl text-amber-400"></i
+            ></span>
+            <span class="flex-1"
+              ><strong class="block text-sm">INGRESAR COMO ADMINISTRADOR</strong
+              ><small class="block text-xs text-slate-400 mt-1"
+                >Acceso mediante código</small
+              ></span
+            >
+            <i class="fa-solid fa-lock text-slate-400"></i>
+          </button>
+        </div>
+        <p
+          id="notice"
+          role="status"
+          class="text-xs text-sky-300 mt-6 min-h-5"
+        ></p>
+      </section>
+      <footer
+        class="bg-slate-950/60 py-5 text-center text-[10px] text-slate-500 tracking-widest"
+      >
+        APP ECUS 2.0 · ACCESO AL SISTEMA
+      </footer>
+    </main>
+
+    <div
+      id="admin-modal"
+      class="hidden fixed inset-0 z-50 bg-slate-950/85 modal-backdrop p-5 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div
+        class="w-full max-w-sm bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl"
+      >
+        <div class="flex justify-between items-center mb-5">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-lock text-amber-400 text-xl"></i>
+            <h2 id="modal-title" class="font-extrabold text-lg">
+              Acceso Administrador
+            </h2>
+          </div>
+          <button
+            id="close-modal"
+            aria-label="Cerrar"
+            class="text-slate-400 hover:text-white p-2"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <p class="text-slate-400 text-xs mb-5">
+          Ingrese su código de seguridad para continuar.
+        </p>
+        <form id="admin-form">
+          <label for="admin-code" class="text-xs font-bold text-slate-300"
+            >CÓDIGO DE ACCESO</label
+          >
+          <input
+            id="admin-code"
+            type="password"
+            inputmode="numeric"
+            pattern="[0-9]{6}"
+            minlength="6"
+            maxlength="6"
+            autocomplete="off"
+            required
+            placeholder="Código de 6 dígitos"
+            class="mt-2 w-full bg-slate-800 border border-slate-600 rounded-2xl px-4 py-3.5 outline-none focus:border-sky-400 text-white"
+          />
+          <p
+            id="admin-message"
+            role="status"
+            class="text-xs text-amber-300 min-h-5 mt-3"
+          ></p>
+          <button
+            type="submit"
+            class="w-full bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-2xl py-3.5 font-extrabold text-sm mt-2"
+          >
+            <i class="fa-solid fa-right-to-bracket mr-2"></i>INGRESAR
+          </button>
+        </form>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="ecus-core.js" defer></script>
+    <script src="login.js" defer></script>
+  </body>
+</html>

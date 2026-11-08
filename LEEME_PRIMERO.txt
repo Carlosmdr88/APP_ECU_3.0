@@ -1,0 +1,92 @@
+APP ECUS 2.0 — SIN AUTENTICACIÓN DE SUPABASE
+============================================
+
+ESTA VERSIÓN REEMPLAZA TODOS LOS ZIP ANTERIORES.
+Solo se utiliza la tabla «administradores» para dar de alta códigos de seis dígitos.
+SIN correos. SIN Supabase Auth. SIN Edge Functions.
+
+INSTALACIÓN (DOS PASOS)
+1) Supabase → SQL Editor → New query:
+   Pegá y ejecutá todo el archivo «supabase/01_INSTALAR.sql».
+   Es una MIGRACIÓN sobre las cuatro tablas que ya tenías. NO vuelve a crearlas
+   ni elimina registros. Reemplaza sus políticas RLS anteriores y añade las
+   funciones SQL que comprueban quién puede ver/editar.
+
+2) Supabase → Table Editor → public → administradores → Insert row:
+   nombre = nombre completo del administrador
+   codigo = un código personal de EXACTAMENTE 6 números (tipo TEXTO, admite 0 inicial)
+   activo = TRUE / marcado para permitir entrar; FALSE para bloquearlo.
+   id y creado_en se rellenan automáticamente. No necesitás crear ningún usuario
+   en Authentication. No hay vínculo con correos.
+   IMPORTANTE: evitar códigos obvios (123456, fechas, 000000) y no repetir códigos.
+
+ABRIR EL PROYECTO
+- Abrí esta carpeta en VS Code y usá Live Server en index.html,
+  por ejemplo http://127.0.0.1:5500/index.html.
+- La URL y clave PUBLICABLE de Supabase ya están en supabase-config.js.
+- No publicar claves service_role / secret en JavaScript.
+
+PANTALLAS
+  index.html                 USUARIO sin código / ADMINISTRADOR código de 6 dígitos
+  registro_usuario.html      Usuario crea registros y hasta 4 fotografías
+  colas_usuario.html         Usuario lee sus registros y respuestas (no edita)
+  registro_admin.html        Administrador crea registros
+  colas_admin.html           Administrador ve TODOS y puede editar estados, campos,
+                             observaciones y agregar hasta 3 fotos por registro.
+
+COMPORTAMIENTO DEL CÓDIGO
+La tabla «public.administradores» contiene nombre, código y activo.
+Al ingresar un código correcto, una función SQL emite un token temporal de 8 h
+para navegar por las páginas administrativas. El código no está escrito en JS.
+Sin código válido no se puede entrar a las pantallas de administrador desde el
+menú y las funciones SQL de edición también rechazan solicitudes no autorizadas.
+Al desmarcar activo se revoca inmediatamente el acceso, incluso en sesiones ya
+abiertas. No se utiliza Auth ni Edge Functions.
+
+CÓMO SE IDENTIFICA EL USUARIO (IMPORTANTE)
+Como NO hay cuentas ni autenticación, cada navegador genera automáticamente
+una clave privada aleatoria guardada en localStorage. La base de datos la utiliza
+para mostrar SOLO los registros creados con esa clave. Esto significa:
+- Dos navegadores/dispositivos distintos NO ven los registros del otro.
+- Dos personas que comparten el mismo navegador/perfil SÍ ven los mismos registros.
+- Si se borran los datos del navegador, se pierde esa clave y sus registros
+  antiguos ya no serán accesibles por el usuario (el Administrador sí los ve).
+- Esta solución no identifica PERSONAS individualmente: identifica el navegador.
+  Para demostrar que una persona es distinta en un equipo compartido se requeriría
+  alguna forma de identificación adicional (contrario al acceso sin código).
+
+FOTOGRAFÍAS
+Para mantener fotos privadas SIN Supabase Auth ni Edge Functions, las nuevas fotos
+se comprimen en el navegador y se guardan como datos binarios en la tabla
+«fotografias», no en un bucket público. Límite de 2 MB por foto comprimida.
+Si tenías fotos de versiones anteriores guardadas en Storage (ruta_storage),
+seguirán allí pero esta versión no las muestra hasta migrarlas; las fotos nuevas sí.
+Almacenarlas en PostgreSQL consume cuota de la base de datos: conviene vigilar
+el espacio a medida que crezcan los registros.
+
+SEGURIDAD Y ALCANCES
+- La clave publishable es pública; no autentica al Administrador por sí sola.
+- La tabla de códigos NO puede consultarse desde el navegador: solo desde Table Editor.
+- Las funciones de servidor comparan el código, comprueban el estado activo y
+  autorizan las modificaciones. Las tablas de registros y fotos no conceden
+  SELECT/UPDATE directos a los navegadores.
+- El código de seis dígitos NO tiene la resistencia de una contraseña larga;
+  hay un límite global de 100 códigos fallidos por 15 minutos en SQL.
+  El límite también puede bloquear temporalmente acceso legítimo ante abuso.
+- Para información personal real se recomienda además una red confiable,
+  dispositivos administrados y una política de protección de datos.
+- Los registros antiguos creados ANTES de esta migración no tienen la nueva
+  clave de navegador; aparecerán solo al Administrador.
+
+PRUEBAS RECOMENDADAS
+1. Crear admin con nombre / código / activo en Table Editor.
+2. USUARIO → Registro → guardar persona y fotos → VER COLAS.
+3. Abrir otro navegador limpio → Usuario → la lista está vacía.
+4. ADMINISTRADOR → código correcto → Registro Admin → Colas Admin: ve todo.
+5. Modificar estado y observaciones de una persona, guardar.
+6. Regresar al primer navegador → Colas Usuario → ver respuesta, sin editar.
+7. En Supabase desmarcar activo al Administrador → rechaza futuros cambios.
+
+IMPORTANTE: Se verificó la sintaxis de los JavaScript y el contenido del ZIP,
+pero NO se pudieron ejecutar consultas reales en tu proyecto Supabase desde aquí.
+Si SQL Editor muestra un error, copiá exactamente el texto y lo ajustamos.

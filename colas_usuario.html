@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="es" data-modo="usuario">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#071426" />
+    <title>APP ECUS 2.0 | Colas USUARIO</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #071426;
+        --panel: #10233a;
+        --panel2: #162d47;
+        --line: #2a4762;
+        --sky: #38bdf8;
+        --muted: #a3b6c9;
+        --text: #f4f8fc;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(ellipse at top, #123354, #071426 65%);
+        font:
+          15px/1.5 system-ui,
+          Segoe UI,
+          Arial,
+          sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: auto;
+        padding: 22px 16px 50px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.17em;
+        color: var(--sky);
+        font-weight: 800;
+      }
+      h1 {
+        margin: 2px 0;
+        font-size: clamp(25px, 5vw, 36px);
+      }
+      h2 {
+        font-size: 18px;
+        margin: 0 0 14px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .badge {
+        display: inline-block;
+        border: 1px solid var(--line);
+        background: #18334d;
+        border-radius: 999px;
+        padding: 4px 11px;
+        font-size: 12px;
+        font-weight: 750;
+      }
+      .badge.pendiente {
+        color: #fde68a;
+        background: #493b1d;
+        border-color: #766028;
+      }
+      .badge.aprobado {
+        color: #86efac;
+        background: #143f31;
+        border-color: #276749;
+      }
+      .badge.rechazado {
+        color: #fca5a5;
+        background: #4b242e;
+        border-color: #7b3646;
+      }
+      .badge.confirmar {
+        color: #93c5fd;
+        background: #193c64;
+        border-color: #2b639a;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 11px 15px;
+        color: white;
+        background: #203a56;
+        font-weight: 750;
+      }
+      .btn:hover {
+        filter: brightness(1.13);
+      }
+      .primary {
+        background: #0284c7;
+        border-color: #0284c7;
+      }
+      .ghost {
+        background: transparent;
+      }
+      .danger {
+        background: #762d3a;
+        border-color: #9c3b4e;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 0 0 16px;
+      }
+      .stat,
+      .panel,
+      .record {
+        border: 1px solid var(--line);
+        background: rgba(16, 35, 58, 0.94);
+        border-radius: 18px;
+        padding: 17px;
+      }
+      .stat strong {
+        display: block;
+        font-size: 28px;
+      }
+      .stat span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .filters {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 12px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .control {
+        width: 100%;
+        background: #081a2e;
+        border: 1px solid #36516c;
+        border-radius: 11px;
+        padding: 11px 12px;
+        color: #fff;
+        outline: none;
+      }
+      .control:focus {
+        border-color: var(--sky);
+        box-shadow: 0 0 0 2px #38bdf833;
+      }
+      .records {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+        margin-top: 16px;
+      }
+      .record-head,
+      .actions,
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .record-head {
+        margin-bottom: 14px;
+      }
+      .record-body {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .avatar {
+        width: 75px;
+        height: 75px;
+        flex: none;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #233b55;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        color: #9cb3c7;
+        overflow: hidden;
+      }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .record h3 {
+        font-size: 16px;
+        margin: 0;
+      }
+      .record p {
+        margin: 3px 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .record .btn {
+        width: 100%;
+        margin-top: 15px;
+      }
+      .empty {
+        text-align: center;
+        padding: 35px;
+        color: var(--muted);
+      }
+      .foot {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: #000b;
+        z-index: 10;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+      }
+      .overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: #0d2035;
+        border: 1px solid #31516e;
+        border-radius: 20px;
+        width: min(760px, 100%);
+        max-height: 94vh;
+        overflow: auto;
+        padding: 20px;
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .modal-head h2 {
+        margin: 0;
+      }
+      .section {
+        background: #152d47;
+        border: 1px solid #2b4965;
+        border-radius: 15px;
+        padding: 15px;
+        margin-top: 13px;
+      }
+      .section h3 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        color: var(--sky);
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .detail-item small {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .detail-item span {
+        overflow-wrap: anywhere;
+      }
+      .photo-main {
+        height: 225px;
+        border-radius: 12px;
+        background: #233c57;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        color: var(--muted);
+      }
+      .photo-main img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+      }
+      .thumbs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+        margin-top: 9px;
+      }
+      .thumb {
+        height: 90px;
+        border: 1px solid #36516c;
+        border-radius: 10px;
+        background: #213a54;
+        color: var(--muted);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .thumb:focus-visible {
+        outline: 2px solid var(--sky);
+      }
+      .admin-fields {
+        display: grid;
+        gap: 11px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .note {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .admin-photos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+      .admin-photos .thumb {
+        width: 100px;
+        position: relative;
+      }
+      .photo-remove {
+        margin-top: 7px;
+        font-size: 12px;
+      }
+      .lightbox {
+        z-index: 20;
+      }
+      .lightbox img {
+        max-width: 90vw;
+        max-height: 80vh;
+        object-fit: contain;
+      }
+      .lightbox .modal {
+        width: auto;
+        text-align: right;
+      }
+      .lightbox .modal img {
+        display: block;
+      }
+      .toast {
+        min-height: 18px;
+        margin-top: 10px;
+        color: #7dd3fc;
+        font-size: 13px;
+      }
+      .warning {
+        color: #fde68a;
+      }
+      .readonly {
+        font-size: 12px;
+        color: #fcd34d;
+        margin-top: 8px;
+      }
+      @media (max-width: 700px) {
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .filters,
+        .records,
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+        .top {
+          align-items: flex-start;
+        }
+        .top .badge {
+          margin-top: 6px;
+        }
+        .wrap {
+          padding-top: 15px;
+        }
+        .modal {
+          padding: 15px;
+        }
+        .thumb {
+          height: 75px;
+        }
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="ecus-core.js" defer></script>
+    <script src="colas.js" defer></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <div>
+          <div class="eyebrow">MÓDULO DE CAMPO · APP ECUS 2.0</div>
+          <h1>Colas · Mis registros</h1>
+          <div class="sub">Solo registros creados desde este navegador</div>
+        </div>
+        <span id="roleBadge" class="badge">Usuario</span>
+      </header>
+      <section class="stats" aria-label="Resumen de estados">
+        <div class="stat"><strong id="total">0</strong><span>Total</span></div>
+        <div class="stat">
+          <strong id="pendientes">0</strong><span>Pendientes</span>
+        </div>
+        <div class="stat">
+          <strong id="aprobados">0</strong><span>Aprobados</span>
+        </div>
+        <div class="stat">
+          <strong id="otrosEstados">0</strong
+          ><span>Rechazados / confirmar</span>
+        </div>
+      </section>
+      <section class="panel" aria-label="Filtros">
+        <h2>Buscar registros</h2>
+        <div class="filters">
+          <label class="field"
+            >Nombre o identificación<input
+              id="buscar"
+              class="control"
+              type="search"
+              placeholder="Buscar persona..." /></label
+          ><label class="field"
+            >Distrito<select id="filtroDistrito" class="control">
+              <option value="">Todos los distritos</option>
+            </select></label
+          ><label class="field"
+            >Estado<select id="filtroEstado" class="control">
+              <option value="">Todos los estados</option>
+              <option>Pendiente</option>
+              <option>Aprobado</option>
+              <option>Rechazado</option>
+              <option>Volver a confirmar</option>
+            </select></label
+          >
+        </div>
+      </section>
+      <div id="lista" class="records" aria-live="polite"></div>
+      <p id="sinRegistros" class="empty hidden">
+        No hay registros que coincidan con los filtros.
+      </p>
+      <nav class="foot" aria-label="Navegación">
+        <a class="btn primary" href="registro_usuario.html">← Registro</a
+        ><button id="btnSalir" type="button" class="btn ghost">Cerrar sesión</button>
+      </nav>
+      <p class="note">
+        Solo se muestran los registros creados desde este navegador. No borres sus datos de navegación.
+      </p>
+    </main>
+    <div id="detailOverlay" class="overlay" role="presentation">
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detailTitle"
+      >
+        <header class="modal-head">
+          <h2 id="detailTitle">Detalle del registro</h2>
+          <button
+            class="btn ghost"
+            id="cerrarDetalle"
+            type="button"
+            aria-label="Cerrar detalles"
+          >
+            ✕
+          </button>
+        </header>
+        <div id="detailContent"></div>
+      </section>
+    </div>
+    <div id="photoOverlay" class="overlay lightbox" role="presentation">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Fotografía ampliada"
+      >
+        <button class="btn ghost" id="cerrarFoto" type="button">Cerrar ✕</button
+        ><img id="fotoAmpliada" alt="Fotografía ampliada" />
+      </div>
+    </div>
+  </body>
+</html>
