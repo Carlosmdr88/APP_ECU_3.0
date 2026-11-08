@@ -14,7 +14,7 @@
   });
   const DISPOSITIVO = 'ecus2_dispositivo_v3', ADMIN = 'ecus2_admin_token_v3';
   const DISTRITOS=['CARMEN','MERCED','HOSPITAL','CATEDRAL','ZAPOTE','SAN FRANCISCO DE DOS RÍOS','URUCA','MATA REDONDA','PAVAS','HATILLO','SAN SEBASTIÁN','OTRO'];
-  const ESTADOS=['Pendiente','Aprobado','Rechazado','Volver a confirmar'];
+  const ESTADOS=['Pendiente','Aprobado','Rechazado','Con expediente NP','Volver a confirmar'];
   const upper=v=>String(v??'').trim().toLocaleUpperCase('es-CR');
   const errorText=e=>e?.message||String(e||'Error desconocido');
   async function rpc(nombre,params){

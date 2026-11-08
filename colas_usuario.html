@@ -101,6 +101,11 @@
         background: #4b242e;
         border-color: #7b3646;
       }
+      .badge.expediente-np {
+        color: #fde68a;
+        background: #493b1d;
+        border-color: #766028;
+      }
       .badge.confirmar {
         color: #93c5fd;
         background: #193c64;
@@ -130,7 +135,7 @@
       }
       .stats {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         margin: 0 0 16px;
       }
@@ -149,11 +154,6 @@
       .stat span {
         font-size: 12px;
         color: var(--muted);
-      }
-      .filters {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr;
-        gap: 12px;
       }
       .field {
         display: flex;
@@ -392,7 +392,6 @@
         .stats {
           grid-template-columns: repeat(2, 1fr);
         }
-        .filters,
         .records,
         .detail-grid {
           grid-template-columns: 1fr;
@@ -435,41 +434,20 @@
           <strong id="pendientes">0</strong><span>Pendientes</span>
         </div>
         <div class="stat">
-          <strong id="aprobados">0</strong><span>Aprobados</span>
+          <strong id="aprobados">0</strong><span>SIN EXPEDIENTE</span>
         </div>
         <div class="stat">
-          <strong id="otrosEstados">0</strong
-          ><span>Rechazados / confirmar</span>
+          <strong id="ordenCaptura">0</strong><span>ORDEN DE CAPTURA</span>
         </div>
-      </section>
-      <section class="panel" aria-label="Filtros">
-        <h2>Buscar registros</h2>
-        <div class="filters">
-          <label class="field"
-            >Nombre o identificación<input
-              id="buscar"
-              class="control"
-              type="search"
-              placeholder="Buscar persona..." /></label
-          ><label class="field"
-            >Distrito<select id="filtroDistrito" class="control">
-              <option value="">Todos los distritos</option>
-            </select></label
-          ><label class="field"
-            >Estado<select id="filtroEstado" class="control">
-              <option value="">Todos los estados</option>
-              <option>Pendiente</option>
-              <option>Aprobado</option>
-              <option>Rechazado</option>
-              <option>Volver a confirmar</option>
-            </select></label
-          >
+        <div class="stat">
+          <strong id="expedienteNP">0</strong><span>CON EXPEDIENTE NP</span>
+        </div>
+        <div class="stat">
+          <strong id="confirmar">0</strong><span>Volver a confirmar</span>
         </div>
       </section>
       <div id="lista" class="records" aria-live="polite"></div>
-      <p id="sinRegistros" class="empty hidden">
-        No hay registros que coincidan con los filtros.
-      </p>
+      <p id="sinRegistros" class="empty hidden">No hay registros para mostrar.</p>
       <nav class="foot" aria-label="Navegación">
         <a class="btn primary" href="registro_usuario.html">← Registro</a
         ><button id="btnSalir" type="button" class="btn ghost">Cerrar sesión</button>

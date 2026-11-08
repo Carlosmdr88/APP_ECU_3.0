@@ -15,15 +15,19 @@ $("roleBadge").textContent = esAdmin
   ? "ADMINISTRADOR"
   : "USUARIO · MIS REGISTROS";
 const filtroDistrito = $("filtroDistrito");
-DISTRITOS.forEach((d) => {
-  const o = document.createElement("option");
-  o.value = d;
-  o.textContent = d;
-  filtroDistrito.append(o);
+const filtroBusqueda = $("buscar");
+const filtroEstado = $("filtroEstado");
+if (filtroDistrito) {
+  DISTRITOS.forEach((d) => {
+    const o = document.createElement("option");
+    o.value = d;
+    o.textContent = d;
+    filtroDistrito.append(o);
+  });
+}
+[filtroBusqueda, filtroDistrito, filtroEstado].forEach((filtro) => {
+  filtro?.addEventListener("input", renderLista);
 });
-["buscar", "filtroDistrito", "filtroEstado"].forEach((id) =>
-  $(id).addEventListener("input", renderLista),
-);
 $("btnSalir").addEventListener("click", () => ECUS.signOut());
 const nodo = (tag, clase = "", valor) => {
   const el = document.createElement(tag);
@@ -36,9 +40,17 @@ const claseEstado = (e) =>
     Pendiente: "pendiente",
     Aprobado: "aprobado",
     Rechazado: "rechazado",
+    "Con expediente NP": "expediente-np",
     "Volver a confirmar": "confirmar",
   })[e] || "";
-const badge = (e) => nodo("span", "badge " + claseEstado(e), e);
+const etiquetaEstado = (e) =>
+  ({
+    Aprobado: "SIN EXPEDIENTE",
+    Rechazado: "ORDEN DE CAPTURA",
+    "Con expediente NP": "CON EXPEDIENTE NP",
+  })[e] || e;
+const badge = (e) =>
+  nodo("span", "badge " + claseEstado(e), etiquetaEstado(e));
 const campo = (nombre, valor) => {
   const e = nodo("div", "detail-item");
   e.append(nodo("small", "", nombre), nodo("span", "", valor || "—"));
@@ -69,12 +81,18 @@ function renderLista() {
   $("aprobados").textContent = registros.filter(
     (r) => r.estado === "Aprobado",
   ).length;
-  $("otrosEstados").textContent = registros.filter(
-    (r) => !["Pendiente", "Aprobado"].includes(r.estado),
+  $("ordenCaptura").textContent = registros.filter(
+    (r) => r.estado === "Rechazado",
   ).length;
-  const buscar = ECUS.upper($("buscar").value),
-    d = $("filtroDistrito").value,
-    e = $("filtroEstado").value;
+  $("expedienteNP").textContent = registros.filter(
+    (r) => r.estado === "Con expediente NP",
+  ).length;
+  $("confirmar").textContent = registros.filter(
+    (r) => r.estado === "Volver a confirmar",
+  ).length;
+  const buscar = filtroBusqueda ? ECUS.upper(filtroBusqueda.value) : "",
+    d = filtroDistrito?.value || "",
+    e = filtroEstado?.value || "";
   const data = registros.filter(
     (r) =>
       (!buscar ||
@@ -86,8 +104,7 @@ function renderLista() {
   lista.replaceChildren();
   $("sinRegistros").classList.toggle("hidden", data.length > 0);
   if (!data.length)
-    $("sinRegistros").textContent =
-      "No hay registros que coincidan con los filtros.";
+    $("sinRegistros").textContent = "No hay registros para mostrar.";
   data.forEach((r) => {
     const card = nodo("article", "record");
     const head = nodo("div", "record-head");
@@ -348,7 +365,7 @@ function edicion(r) {
   const labelE = nodo("label", "field", "Estado"),
     est = nodo("select", "control");
   ESTADOS.forEach((x) => {
-    const opt = nodo("option", "", x);
+    const opt = nodo("option", "", etiquetaEstado(x));
     opt.value = x;
     est.append(opt);
   });
@@ -493,7 +510,7 @@ async function cargarHistorial(r) {
         nodo(
           "p",
           "",
-          `${fechaCR(h.fecha_cambio)} · ${h.estado_anterior || "NUEVO"} → ${h.estado_nuevo}${h.observacion ? " · " + h.observacion : ""}`,
+          `${fechaCR(h.fecha_cambio)} · ${etiquetaEstado(h.estado_anterior || "NUEVO")} → ${etiquetaEstado(h.estado_nuevo)}${h.observacion ? " · " + h.observacion : ""}`,
         ),
       ),
     );
