@@ -7,6 +7,7 @@ const distrito=document.getElementById('distrito');
 const otroWrap=document.getElementById('otro-distrito-wrap');
 const otroDistrito=document.getElementById('otro_distrito');
 const photoInput=document.getElementById('photo-input');
+const photoSourceDialog=document.getElementById('photo-source-dialog');
 const tiles=[...document.querySelectorAll('.photo-tile')];
 ECUS.requireMode(modo).then(x=>{permiso=x;}).catch(e=>mostrarMensaje(ECUS.getMessage(e),true));
 function mostrarMensaje(msj,esError=false){
@@ -26,9 +27,30 @@ function vistaFoto(i){
  document.getElementById('photo-count').textContent=`${fotos.filter(Boolean).length} / 4`;
 }
 tiles.forEach((tile,i)=>{
- tile.addEventListener('click',e=>{if(!e.target.closest('.remove-photo')){indiceFotoActivo=i;photoInput.value='';photoInput.click();}});
- tile.addEventListener('keydown',e=>{if(e.target===tile&&(e.key==='Enter'||e.key===' ')){e.preventDefault();indiceFotoActivo=i;photoInput.value='';photoInput.click();}});
+ tile.addEventListener('click',e=>{if(!e.target.closest('.remove-photo')){abrirSelectorFoto(i);}});
+ tile.addEventListener('keydown',e=>{if(e.target===tile&&(e.key==='Enter'||e.key===' ')){e.preventDefault();abrirSelectorFoto(i);}});
  tile.querySelector('.remove-photo').addEventListener('click',e=>{e.stopPropagation();fotos[i]=null;vistaFoto(i);});
+});
+function abrirSelectorFoto(i){
+ indiceFotoActivo=i;photoInput.value='';photoSourceDialog.classList.add('open');
+ photoSourceDialog.querySelector('[data-photo-source="camera"]').focus();
+}
+function cerrarSelectorFoto(){photoSourceDialog.classList.remove('open');}
+photoSourceDialog.addEventListener('click',e=>{
+ if(e.target===photoSourceDialog)cerrarSelectorFoto();
+});
+photoSourceDialog.querySelectorAll('[data-photo-source]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const fuente=button.dataset.photoSource;
+  cerrarSelectorFoto();
+  if(fuente==='cancel')return;
+  if(fuente==='camera')photoInput.setAttribute('capture','environment');
+  else photoInput.removeAttribute('capture');
+  photoInput.click();
+ });
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&photoSourceDialog.classList.contains('open'))cerrarSelectorFoto();
 });
 photoInput.addEventListener('change',()=>{
  const f=photoInput.files?.[0];if(!f)return;

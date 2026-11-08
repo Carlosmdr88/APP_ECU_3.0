@@ -54,6 +54,12 @@
       .photo-tile.has-photo .placeholder {
         display: none;
       }
+      .photo-source-dialog {
+        display: none;
+      }
+      .photo-source-dialog.open {
+        display: flex;
+      }
     </style>
   </head>
   <body class="text-slate-100 min-h-screen py-0 sm:py-8 px-0 sm:px-4">
@@ -284,6 +290,28 @@
         </p>
       </form>
     </main>
+    <div
+      id="photo-source-dialog"
+      class="photo-source-dialog fixed inset-0 z-50 items-center justify-center bg-slate-950/80 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photo-source-title"
+    >
+      <div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">
+        <h2 id="photo-source-title" class="mb-4 text-lg font-bold">Agregar fotografía</h2>
+        <div class="grid gap-3">
+          <button type="button" data-photo-source="camera" class="rounded-xl bg-sky-500 p-4 font-bold text-slate-950">
+            <i class="fa-solid fa-camera mr-2"></i>Tomar foto
+          </button>
+          <button type="button" data-photo-source="gallery" class="rounded-xl bg-slate-800 p-4 font-bold text-white">
+            <i class="fa-solid fa-images mr-2"></i>Elegir de galería
+          </button>
+          <button type="button" data-photo-source="cancel" class="rounded-xl p-3 text-slate-300">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
     <style>
       .field-label {
         display: block;
