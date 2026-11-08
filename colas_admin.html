@@ -355,6 +355,16 @@
         width: 100px;
         position: relative;
       }
+      .admin-photos .empty-admin-photo {
+        border-style: dashed;
+        cursor: pointer;
+      }
+      .admin-photos .empty-admin-photo:hover,
+      .admin-photos .selected-admin-photo {
+        border-color: var(--sky);
+        color: var(--text);
+        box-shadow: 0 0 0 2px #38bdf833;
+      }
       .photo-remove {
         margin-top: 7px;
         font-size: 12px;
