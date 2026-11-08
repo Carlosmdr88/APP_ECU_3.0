@@ -106,7 +106,7 @@ function renderLista() {
   if (!data.length)
     $("sinRegistros").textContent = "No hay registros para mostrar.";
   data.forEach((r) => {
-    const card = nodo("article", "record");
+    const card = nodo("article", `record ${claseEstado(r.estado)}`);
     const head = nodo("div", "record-head");
     head.append(nodo("span", "sub", `Registro #${r.id}`), badge(r.estado));
     card.append(head);
@@ -140,6 +140,7 @@ async function cargar() {
     ...r,
     fotosUsuario: [null, null, null, null],
     fotosAdmin: [null, null, null],
+    fotosCargadas: false,
   }));
   renderLista();
 }
@@ -447,6 +448,14 @@ function renderDetalle(r) {
   content.replaceChildren();
   const estado = seccion("Estado actual");
   estado.append(badge(r.estado));
+  const botonPdf = nodo("button", "btn primary", "DESCARGAR PDF");
+  botonPdf.type = "button";
+  botonPdf.disabled = !r.fotosCargadas;
+  botonPdf.title = r.fotosCargadas
+    ? "Imprimir o guardar este registro como PDF"
+    : "Espere a que terminen de cargar las fotografías";
+  botonPdf.addEventListener("click", () => generarPdf(r));
+  estado.append(botonPdf);
   content.append(estado);
   const dat = seccion("Información del registro"),
     g = nodo("div", "detail-grid");
@@ -478,6 +487,147 @@ function renderDetalle(r) {
       ),
     );
 }
+async function generarPdf(r) {
+  const ventana = window.open("", "_blank");
+  if (!ventana) {
+    alert(
+      "El navegador bloqueó la ventana del PDF. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.",
+    );
+    return;
+  }
+
+  ventana.document.open();
+  ventana.document.write(
+    `<!doctype html>
+      <html lang="es">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Registro</title>
+          <style>
+            body { font: 14px/1.5 Arial, sans-serif; color: #172033; margin: 28px; }
+            h1 { font-size: 22px; margin: 0 0 4px; }
+            .meta { color: #596579; margin: 0 0 20px; }
+            .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin: 0; }
+            .fields div { border-bottom: 1px solid #d5dbe5; padding: 0 0 8px; break-inside: avoid; }
+            .fields dt { font-size: 11px; text-transform: uppercase; color: #596579; font-weight: bold; }
+            .fields dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+            .status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-weight: bold; background: #e8edf3; }
+            .status.aprobado { color: #14532d; background: #dcfce7; }
+            .status.rechazado { color: #991b1b; background: #fee2e2; }
+            .status.expediente-np { color: #854d0e; background: #fef3c7; }
+            .status.confirmar { color: #1e40af; background: #dbeafe; }
+            .photos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+            .photo { border: 1px solid #d5dbe5; border-radius: 8px; padding: 8px; break-inside: avoid; }
+            .photo img { display: block; width: 100%; height: 220px; object-fit: contain; }
+            .photo p { font-size: 12px; color: #596579; margin: 4px 0 0; }
+            h2 { font-size: 16px; margin: 22px 0 8px; }
+            .empty { color: #596579; }
+            @page { size: A4; margin: 16mm; }
+            @media print {
+              body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              .photo img { height: 190px; }
+            }
+          </style>
+        </head>
+        <body></body>
+      </html>`,
+  );
+  ventana.document.close();
+  ventana.document.title = `Registro_${r.id}`;
+
+  const doc = ventana.document;
+  const titulo = doc.createElement("h1");
+  titulo.textContent = "Registro de persona";
+  doc.body.append(titulo);
+  const numero = doc.createElement("p");
+  numero.className = "meta";
+  numero.textContent = `Número de registro: ${r.id}`;
+  doc.body.append(numero);
+
+  const estado = doc.createElement("p");
+  const etiqueta = doc.createElement("span");
+  etiqueta.className = `status ${claseEstado(r.estado)}`;
+  etiqueta.textContent = etiquetaEstado(r.estado);
+  estado.append("Último estado: ", etiqueta);
+  doc.body.append(estado);
+
+  const datos = [
+    ["Nombre completo", r.nombre_completo],
+    ["Identificación", r.identificacion],
+    ["Fecha de nacimiento", r.fecha_nacimiento],
+    ["Nacionalidad", r.nacionalidad],
+    ["Lugar de consulta", r.lugar_consulta],
+    [
+      "Distrito",
+      r.distrito === "OTRO" ? r.otro_distrito || "OTRO" : r.distrito,
+    ],
+    ["Fecha de registro", fechaCR(r.fecha_registro)],
+  ];
+  const lista = doc.createElement("dl");
+  lista.className = "fields";
+  datos.forEach(([nombre, valor]) => {
+    const item = doc.createElement("div");
+    const termino = doc.createElement("dt");
+    termino.textContent = nombre;
+    const detalle = doc.createElement("dd");
+    detalle.textContent = valor || "—";
+    item.append(termino, detalle);
+    lista.append(item);
+  });
+  doc.body.append(lista);
+
+  const tituloFotos = doc.createElement("h2");
+  tituloFotos.textContent = "Fotografías";
+  doc.body.append(tituloFotos);
+  const fotos = doc.createElement("div");
+  fotos.className = "photos";
+  const imagenes = [
+    ...r.fotosUsuario.map((foto, i) => ({
+      foto,
+      nombre: `Foto de registro ${i + 1}`,
+    })),
+    ...r.fotosAdmin.map((foto, i) => ({
+      foto,
+      nombre: `Foto administrativa ${i + 1}`,
+    })),
+  ].filter(({ foto }) => foto?.url);
+
+  if (imagenes.length) {
+    const cargas = [];
+    imagenes.forEach(({ foto, nombre }) => {
+      const item = doc.createElement("div");
+      item.className = "photo";
+      const imagen = doc.createElement("img");
+      imagen.src = foto.url;
+      imagen.alt = nombre;
+      const pie = doc.createElement("p");
+      pie.textContent = nombre;
+      item.append(imagen, pie);
+      fotos.append(item);
+      cargas.push(imagen.decode());
+    });
+    doc.body.append(fotos);
+    try {
+      await Promise.all(cargas);
+    } catch (err) {
+      ventana.close();
+      alert(
+        "No se pudieron preparar todas las fotografías para el PDF: " +
+          ECUS.getMessage(err),
+      );
+      return;
+    }
+  } else {
+    const sinFotos = doc.createElement("p");
+    sinFotos.className = "empty";
+    sinFotos.textContent = "Este registro no tiene fotografías.";
+    doc.body.append(sinFotos);
+  }
+
+  ventana.focus();
+  ventana.print();
+}
 async function cargarFotos(r) {
   const data = await ECUS.listPhotos(r.id, modo);
   r.fotosUsuario = [null, null, null, null];
@@ -491,6 +641,7 @@ async function cargarFotos(r) {
         url: `data:${f.mime || "image/jpeg"};base64,${f.base64}`,
       };
   }
+  r.fotosCargadas = true;
 }
 async function cargarHistorial(r) {
   const s = seccion("Historial de estados"),
