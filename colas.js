@@ -5,6 +5,7 @@ const esAdmin = modo === "admin";
 const ESTADOS = ECUS.ESTADOS,
   DISTRITOS = ECUS.DISTRITOS;
 let registros = [],
+  registrosVisibles = [],
   activo = null,
   ultimoFoco = null,
   permiso = null;
@@ -34,6 +35,10 @@ if (filtroDistrito) {
   filtro?.addEventListener("change", renderLista);
 });
 $("btnSalir").addEventListener("click", () => ECUS.signOut());
+const botonExportarExcel = $("exportarExcel");
+if (botonExportarExcel) {
+  botonExportarExcel.addEventListener("click", exportarRegistrosExcel);
+}
 const nodo = (tag, clase = "", valor) => {
   const el = document.createElement(tag);
   if (clase) el.className = clase;
@@ -134,6 +139,7 @@ function renderLista() {
     );
   });
   const lista = $("lista");
+  registrosVisibles = data;
   lista.replaceChildren();
   $("sinRegistros").classList.toggle("hidden", data.length > 0);
   if (!data.length) {
@@ -169,6 +175,140 @@ function renderLista() {
     card.append(boton);
     lista.append(card);
   });
+}
+async function exportarRegistrosExcel() {
+  const estado = $("estadoExportacion");
+  const desde = filtroFechaDesde?.value || "";
+  const hasta = filtroFechaHasta?.value || "";
+  if (!desde && !hasta) {
+    estado.textContent = "Selecciona al menos una fecha de registro.";
+    return;
+  }
+  if (desde && hasta && desde > hasta) {
+    estado.textContent = "La fecha inicial no puede ser posterior a la final.";
+    return;
+  }
+  if (!registrosVisibles.length) {
+    estado.textContent = "No hay registros en el rango y filtros seleccionados.";
+    return;
+  }
+  if (!window.ExcelJS) {
+    estado.textContent =
+      "No se pudo cargar el generador de Excel. Revisa la conexión e inténtalo de nuevo.";
+    return;
+  }
+
+  botonExportarExcel.disabled = true;
+  try {
+    const libro = new ExcelJS.Workbook();
+    libro.creator = "APP ECUS 2.0";
+    libro.created = new Date();
+    const hoja = libro.addWorksheet("Registros");
+    const encabezados = [
+      "N.º registro",
+      "Nombre completo",
+      "Identificación",
+      "Fecha de nacimiento",
+      "Nacionalidad",
+      "Lugar de consulta",
+      "Distrito",
+      "Fecha de registro",
+      "Último estado",
+      "Foto de registro 1",
+      "Foto de registro 2",
+      "Foto de registro 3",
+      "Foto de registro 4",
+      "Foto administrativa 1",
+      "Foto administrativa 2",
+      "Foto administrativa 3",
+    ];
+    const cabecera = hoja.addRow(encabezados);
+    cabecera.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cabecera.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF17324D" },
+    };
+    hoja.views = [{ state: "frozen", ySplit: 1 }];
+    hoja.autoFilter = {
+      from: { row: 1, column: 1 },
+      to: { row: 1, column: encabezados.length },
+    };
+    hoja.columns = encabezados.map((header, i) => ({
+      header,
+      key: `columna${i}`,
+      width: i === 1 || i === 5 ? 28 : i === 8 ? 24 : i >= 9 ? 18 : 20,
+    }));
+
+    for (let i = 0; i < registrosVisibles.length; i++) {
+      const registro = registrosVisibles[i];
+      estado.textContent = `Preparando registro ${i + 1} de ${registrosVisibles.length} y sus fotografías...`;
+      if (!registro.fotosCargadas) await cargarFotos(registro);
+
+      const distrito =
+        registro.distrito === "OTRO"
+          ? registro.otro_distrito || "OTRO"
+          : registro.distrito;
+      const fila = hoja.addRow([
+        registro.id,
+        registro.nombre_completo || "",
+        registro.identificacion || "",
+        registro.fecha_nacimiento || "",
+        registro.nacionalidad || "",
+        registro.lugar_consulta || "",
+        distrito || "",
+        fechaCR(registro.fecha_registro),
+        etiquetaEstado(registro.estado),
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
+      fila.height = 58;
+      fila.alignment = { vertical: "middle", wrapText: true };
+
+      const fotos = [...registro.fotosUsuario, ...registro.fotosAdmin];
+      fotos.forEach((foto, indice) => {
+        if (!foto?.url) return;
+        const formato = foto.url.match(/^data:image\/(jpeg|png);base64,/i);
+        if (!formato) {
+          throw new Error(
+            `La foto ${indice + 1} del registro #${registro.id} tiene un formato no compatible con Excel.`,
+          );
+        }
+        const imagenId = libro.addImage({
+          base64: foto.url,
+          extension: formato[1].toLowerCase(),
+        });
+        hoja.addImage(imagenId, {
+          tl: { col: 9 + indice, row: fila.number - 1 },
+          ext: { width: 110, height: 72 },
+        });
+      });
+    }
+
+    estado.textContent = "Generando archivo de Excel...";
+    const contenido = await libro.xlsx.writeBuffer();
+    const url = URL.createObjectURL(
+      new Blob([contenido], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+    );
+    const enlace = document.createElement("a");
+    enlace.href = url;
+    enlace.download = `registros_${desde || "inicio"}_${hasta || "hoy"}.xlsx`;
+    enlace.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    estado.textContent = `Excel descargado: ${registrosVisibles.length} registros con sus fotografías disponibles.`;
+  } catch (err) {
+    estado.textContent =
+      "No se pudo exportar el Excel: " + ECUS.getMessage(err);
+  } finally {
+    botonExportarExcel.disabled = false;
+  }
 }
 async function cargar() {
   const data = await ECUS.listRecords(modo);

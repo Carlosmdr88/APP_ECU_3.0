@@ -164,6 +164,18 @@
         grid-template-columns: 2fr repeat(4, minmax(0, 1fr));
         gap: 12px;
       }
+      .export-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .export-controls .btn {
+        flex: none;
+      }
+      .export-controls .toast {
+        margin: 0;
+      }
       .field {
         display: flex;
         flex-direction: column;
@@ -415,6 +427,10 @@
         .records,
         .detail-grid {
           grid-template-columns: 1fr;
+        }
+        .export-controls {
+          align-items: stretch;
+          flex-direction: column;
         }
         .top {
           align-items: flex-start;
