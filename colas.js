@@ -59,8 +59,7 @@ const etiquetaEstado = (e) =>
     Rechazado: "ORDEN DE CAPTURA",
     "Con expediente NP": "CON EXPEDIENTE NP",
   })[e] || e;
-const badge = (e) =>
-  nodo("span", "badge " + claseEstado(e), etiquetaEstado(e));
+const badge = (e) => nodo("span", "badge " + claseEstado(e), etiquetaEstado(e));
 const campo = (nombre, valor) => {
   const e = nodo("div", "detail-item");
   e.append(nodo("small", "", nombre), nodo("span", "", valor || "—"));
@@ -90,7 +89,8 @@ function fechaRegistroCR(f) {
     month: "2-digit",
     day: "2-digit",
   }).formatToParts(fecha);
-  const parte = (tipo) => partes.find((item) => item.type === tipo)?.value || "";
+  const parte = (tipo) =>
+    partes.find((item) => item.type === tipo)?.value || "";
   return `${parte("year")}-${parte("month")}-${parte("day")}`;
 }
 function aviso(msj) {
@@ -189,7 +189,8 @@ async function exportarRegistrosExcel() {
     return;
   }
   if (!registrosVisibles.length) {
-    estado.textContent = "No hay registros en el rango y filtros seleccionados.";
+    estado.textContent =
+      "No hay registros en el rango y filtros seleccionados.";
     return;
   }
   if (!window.ExcelJS) {

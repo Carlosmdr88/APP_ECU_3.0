@@ -26,7 +26,9 @@
           >
             APP ECUS 2.0 · MÓDULO DE CAMPO
           </p>
-          <h1 class="text-2xl font-extrabold mt-3">Registro de Control · ADMINISTRADOR</h1>
+          <h1 class="text-2xl font-extrabold mt-3">
+            Registro de Control · ADMINISTRADOR
+          </h1>
           <p class="text-xs text-slate-400 mt-1">
             Capture los datos y fotografías del registro.
           </p>
@@ -250,23 +252,42 @@
       aria-modal="true"
       aria-labelledby="photo-source-title"
     >
-      <div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">
-        <h2 id="photo-source-title" class="mb-4 text-lg font-bold">Agregar fotografía</h2>
+      <div
+        class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl"
+      >
+        <h2 id="photo-source-title" class="mb-4 text-lg font-bold">
+          Agregar fotografía
+        </h2>
         <div class="grid gap-3">
-          <button type="button" data-photo-source="camera" class="rounded-xl bg-sky-500 p-4 font-bold text-slate-950">
+          <button
+            type="button"
+            data-photo-source="camera"
+            class="rounded-xl bg-sky-500 p-4 font-bold text-slate-950"
+          >
             <i class="fa-solid fa-camera mr-2"></i>Tomar foto
           </button>
-          <button type="button" data-photo-source="gallery" class="rounded-xl bg-slate-800 p-4 font-bold text-white">
+          <button
+            type="button"
+            data-photo-source="gallery"
+            class="rounded-xl bg-slate-800 p-4 font-bold text-white"
+          >
             <i class="fa-solid fa-images mr-2"></i>Elegir de galería
           </button>
-          <button type="button" data-photo-source="cancel" class="rounded-xl p-3 text-slate-300">
+          <button
+            type="button"
+            data-photo-source="cancel"
+            class="rounded-xl p-3 text-slate-300"
+          >
             Cancelar
           </button>
         </div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      defer
+    ></script>
     <script src="supabase-config.js" defer></script>
     <script src="ecus-core.js" defer></script>
     <script src="registro.js" defer></script>
