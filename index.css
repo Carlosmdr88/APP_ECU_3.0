@@ -1,0 +1,10 @@
+body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #0f172a;
+      }
+      .screen {
+        background: radial-gradient(circle at 50% 0%, #172b47 0%, #0f172a 50%);
+      }
+      .modal-backdrop {
+        backdrop-filter: blur(8px);
+      }

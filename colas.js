@@ -17,6 +17,8 @@ $("roleBadge").textContent = esAdmin
 const filtroDistrito = $("filtroDistrito");
 const filtroBusqueda = $("buscar");
 const filtroEstado = $("filtroEstado");
+const filtroFechaDesde = $("fechaRegistroDesde");
+const filtroFechaHasta = $("fechaRegistroHasta");
 if (filtroDistrito) {
   DISTRITOS.forEach((d) => {
     const o = document.createElement("option");
@@ -27,6 +29,9 @@ if (filtroDistrito) {
 }
 [filtroBusqueda, filtroDistrito, filtroEstado].forEach((filtro) => {
   filtro?.addEventListener("input", renderLista);
+});
+[filtroFechaDesde, filtroFechaHasta].forEach((filtro) => {
+  filtro?.addEventListener("change", renderLista);
 });
 $("btnSalir").addEventListener("click", () => ECUS.signOut());
 const nodo = (tag, clase = "", valor) => {
@@ -69,6 +74,20 @@ const fechaCR = (f) =>
         timeStyle: "short",
       })
     : "—";
+function fechaRegistroCR(f) {
+  if (!f) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return f;
+  const fecha = new Date(f);
+  if (Number.isNaN(fecha.getTime())) return "";
+  const partes = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Costa_Rica",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(fecha);
+  const parte = (tipo) => partes.find((item) => item.type === tipo)?.value || "";
+  return `${parte("year")}-${parte("month")}-${parte("day")}`;
+}
 function aviso(msj) {
   $("sinRegistros").textContent = msj;
   $("sinRegistros").classList.remove("hidden");
@@ -92,19 +111,36 @@ function renderLista() {
   ).length;
   const buscar = filtroBusqueda ? ECUS.upper(filtroBusqueda.value) : "",
     d = filtroDistrito?.value || "",
-    e = filtroEstado?.value || "";
-  const data = registros.filter(
-    (r) =>
-      (!buscar ||
-        `${r.nombre_completo} ${r.identificacion}`.includes(buscar)) &&
-      (!d || r.distrito === d) &&
-      (!e || r.estado === e),
-  );
+    e = filtroEstado?.value || "",
+    desde = filtroFechaDesde?.value || "",
+    hasta = filtroFechaHasta?.value || "",
+    rangoValido = !desde || !hasta || desde <= hasta;
+  const data = registros.filter((r) => {
+    if (
+      !rangoValido ||
+      (buscar &&
+        !`${r.nombre_completo} ${r.identificacion}`.includes(buscar)) ||
+      (d && r.distrito !== d) ||
+      (e && r.estado !== e)
+    ) {
+      return false;
+    }
+    if (!desde && !hasta) return true;
+    const fechaRegistro = fechaRegistroCR(r.fecha_registro);
+    return (
+      fechaRegistro !== "" &&
+      (!desde || fechaRegistro >= desde) &&
+      (!hasta || fechaRegistro <= hasta)
+    );
+  });
   const lista = $("lista");
   lista.replaceChildren();
   $("sinRegistros").classList.toggle("hidden", data.length > 0);
-  if (!data.length)
-    $("sinRegistros").textContent = "No hay registros para mostrar.";
+  if (!data.length) {
+    $("sinRegistros").textContent = rangoValido
+      ? "No hay registros que coincidan con los filtros."
+      : "La fecha inicial no puede ser posterior a la fecha final.";
+  }
   data.forEach((r) => {
     const card = nodo("article", `record ${claseEstado(r.estado)}`);
     const head = nodo("div", "record-head");

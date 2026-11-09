@@ -1,3 +1,29 @@
+ALTER TABLE public.registros
+  DROP CONSTRAINT registros_estado_check,
+  ADD CONSTRAINT registros_estado_check
+    CHECK (
+      estado IN (
+        'Pendiente',
+        'Aprobado',
+        'Rechazado',
+        'Con expediente NP',
+        'Volver a confirmar'
+      )
+    );
+
+ALTER TABLE public.historial_estados
+  DROP CONSTRAINT historial_estados_estado_nuevo_check,
+  ADD CONSTRAINT historial_estados_estado_nuevo_check
+    CHECK (
+      estado_nuevo IN (
+        'Pendiente',
+        'Aprobado',
+        'Rechazado',
+        'Con expediente NP',
+        'Volver a confirmar'
+      )
+    );
+
 CREATE OR REPLACE FUNCTION public.ecus_editar_registro(
   p_token_admin text,
   p_registro bigint,

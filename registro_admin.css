@@ -1,0 +1,72 @@
+body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #0f172a;
+      }
+      input,
+      select {
+        color-scheme: dark;
+      }
+      .photo-tile {
+        border: 2px dashed #475569;
+        background: #1e293b;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .photo-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+      }
+      .remove-photo {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        z-index: 2;
+        background: #dc2626;
+        color: white;
+        border-radius: 999px;
+        width: 28px;
+        height: 28px;
+        display: none;
+      }
+      .photo-tile.has-photo .remove-photo {
+        display: block;
+      }
+      .photo-tile.has-photo .placeholder {
+        display: none;
+      }
+      .photo-source-dialog {
+        display: none;
+      }
+      .photo-source-dialog.open {
+        display: flex;
+      }
+
+.field-label {
+        display: block;
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 7px;
+      }
+      .field {
+        width: 100%;
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 14px;
+        padding: 13px 14px;
+        font-size: 13px;
+        color: white;
+        outline: none;
+      }
+      .field:focus {
+        border-color: #0ea5e9;
+      }
+      .field::placeholder {
+        color: #64748b;
+      }
